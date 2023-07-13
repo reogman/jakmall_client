@@ -1,4 +1,4 @@
-use super::{err_http_msg, err_parse, err_parse_msg, some_or_err, utils::get_last_bracket};
+use crate::{err_http_msg, err_parse, err_parse_msg, some_or_err, utils::get_last_bracket};
 use anyhow::{Context, Result};
 use reqwest::Client;
 use scraper::{Html, Selector};
@@ -6,6 +6,7 @@ use serde_json::Value;
 
 /// Digunakan untuk mendapatkan jumlah total halaman pada kategori tertentu
 ///
+/// ## Examples
 /// ```
 /// use anyhow::{Result, Context};
 ///

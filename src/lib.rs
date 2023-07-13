@@ -1,8 +1,7 @@
-mod g_categories;
-mod g_category_page_count;
-mod g_products_at_page;
+mod fetcher_models;
+mod fetchers;
 mod utils;
 
-pub use g_categories::*;
-pub use g_category_page_count::*;
-pub use g_products_at_page::*;
+pub use fetchers::g_categories::*;
+pub use fetchers::g_category_page_count::*;
+pub use fetchers::g_products_at_page::*;
