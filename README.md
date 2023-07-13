@@ -35,7 +35,7 @@ async fn main() -> anyhow::Result<JakmallCategories> {
 }
 ```
 
-- Mendapatkan batas halaman / max page pada kategori `aksesoris-handphone`
+- Mendapatkan batas halaman / max page pada kategori `aksesoris-handphone`.
 ```rs
 use anyhow::{Result, Context};
 
@@ -49,13 +49,15 @@ async fn main() -> Result<()> {
 }
 ```
 
-- Mendapatkan daftar produk pada kategori `aksesoris-handphone` halaman ke `1`
+- Mendapatkan daftar produk pada kategori `aksesoris-handphone` halaman ke `1`.
 ```rust
 use anyhow::{Context, Result};
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let product_list = jakmall_rs::get_products_at_page("https://www.jakmall.com/aksesoris-handphone?page=1")
+    let product_list = jakmall_rs::get_products_at_page(
+            "https://www.jakmall.com/aksesoris-handphone?page=1"
+        )
         .await
         .context("Gagal mendapatkan data")?;
 
