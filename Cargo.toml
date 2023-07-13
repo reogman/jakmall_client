@@ -1,0 +1,19 @@
+[package]
+name = "jakmall-rs"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "jakmall_rs"
+path = "src/lib.rs"
+crate-type = ["lib"]
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dev-dependencies]
+tokio = { version = "1.29.1", features = ["full"] }
+
+[dependencies]
+anyhow = "1.0.71"
+reqwest = { version = "0.11.18", features = ["default", "gzip", "json"] }
+serde = { version = "1.0.171", features = ["derive"] }
+serde_json = "1.0.102"
