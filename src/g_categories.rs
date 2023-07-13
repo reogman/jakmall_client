@@ -1,3 +1,4 @@
+use super::{err_http_msg, err_parse_msg};
 use anyhow::{Context, Result};
 use reqwest::{
     header::{HeaderMap, HeaderValue},
@@ -52,16 +53,18 @@ pub async fn get_categories() -> Result<JakmallCategories> {
     let client = Client::builder()
         .default_headers(headers)
         .build()
-        .context("Fail to create GET CATEGORIES client")?;
+        .context(err_http_msg!("Fail to create GET CATEGORIES client"))?;
 
     let response = client
         .get(target_url)
         .send()
         .await
-        .context("Fail to send GET CATEGORIES request")?
+        .context(err_http_msg!("Fail to send GET CATEGORIES request"))?
         .json::<JakmallCategories>()
         .await
-        .context("Fail to retrieve data GET CATEGORIES request")?;
+        .context(err_parse_msg!(
+            "Fail to retrieve data GET CATEGORIES request"
+        ))?;
 
     Ok(response)
 }
