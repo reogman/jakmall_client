@@ -1,4 +1,7 @@
-use crate::{err_http_msg, err_parse, err_parse_msg, some_or_err, utils::get_last_bracket};
+use crate::{
+    err_http_msg, err_parse, err_parse_msg, some_or_err,
+    utils::{get_last_bracket, BracketType},
+};
 use anyhow::{Context, Result};
 use reqwest::Client;
 use scraper::{Html, Selector};
@@ -41,7 +44,11 @@ pub async fn get_category_page_count(category_name: &str) -> Result<usize> {
 
             let start_trim =
                 some_or_err!(content.find(find), "pagination key not found") + find.len();
-            let end_trim = get_last_bracket(content.get(start_trim..).unwrap_or(""), start_trim);
+            let end_trim = get_last_bracket(
+                content.get(start_trim..).unwrap_or(""),
+                start_trim,
+                BracketType::Curly,
+            );
 
             let str_object = some_or_err!(
                 content.get(start_trim..end_trim + 1),

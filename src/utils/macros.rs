@@ -16,7 +16,7 @@ macro_rules! some_or_err {
     ($some:expr, $errmsg: literal $(,)?) => {
         match $some {
             Some(tar) => tar,
-            None => err_parse!($errmsg),
+            None => return Err(anyhow::anyhow!(format!("Parse Error -> {}", $errmsg))),
         }
     };
 }
@@ -31,6 +31,6 @@ macro_rules! err_parse_msg {
 #[macro_export]
 macro_rules! err_http_msg {
     ($msg:literal $(,)?) => {
-        format!("Fail to send request {}", $msg)
+        format!("Fail to retrieve response {}", $msg)
     };
 }
