@@ -1,5 +1,5 @@
-mod fetcher_models;
-mod fetchers;
+pub mod fetcher_models;
+pub mod fetchers;
 mod utils;
 
 pub use fetchers::g_categories::*;
