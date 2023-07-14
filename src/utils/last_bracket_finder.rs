@@ -5,6 +5,7 @@ pub fn get_last_bracket<T: Into<String>>(
 ) -> usize {
     let doc: String = doc.into();
     let mut counter = 0;
+    let mut switch = false;
 
     let mut open = '{';
     let mut close = '}';
@@ -15,6 +16,14 @@ pub fn get_last_bracket<T: Into<String>>(
     }
 
     for (index, char) in doc.chars().enumerate() {
+        if char == '"' {
+            switch = !switch;
+        }
+
+        if switch {
+            continue;
+        }
+
         if char == open {
             counter += 1;
         }
