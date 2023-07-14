@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::{
-    err_http_msg, err_parse, err_parse_msg, some_or_err,
+    err_http_msg, err_parse, err_parse_msg,
     utils::{get_last_bracket, BracketType},
 };
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use reqwest::Client;
 use scraper::{Html, Selector};
 use serde_json::Value;
@@ -47,18 +47,18 @@ where
             let find = r#""products":"#;
             let content = element.html();
 
-            let start_trim =
-                some_or_err!(content.find(find), "products key not found") + find.len();
+            let start_trim = content
+                .find(find)
+                .ok_or_else(|| anyhow!("products key not found"))?;
             let end_trim = get_last_bracket(
                 content.get(start_trim..).unwrap_or(""),
                 start_trim,
                 BracketType::Square,
             );
 
-            let str_object = some_or_err!(
-                content.get(start_trim..end_trim + 1),
-                "object string not found"
-            );
+            let str_object = content
+                .get(start_trim..end_trim + 1)
+                .ok_or_else(|| anyhow!("object string not found"))?;
 
             let products = serde_json::from_str::<Vec<HashMap<&str, Value>>>(str_object).context(
                 err_parse_msg!("error serialize while convert object string to json model",),

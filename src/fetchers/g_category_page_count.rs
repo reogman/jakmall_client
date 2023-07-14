@@ -2,7 +2,7 @@ use crate::{
     err_http_msg, err_parse, err_parse_msg, some_or_err,
     utils::{get_last_bracket, BracketType},
 };
-use anyhow::{Context, Result};
+use anyhow::{anyhow, Context, Result};
 use reqwest::Client;
 use scraper::{Html, Selector};
 use serde_json::Value;
@@ -42,18 +42,18 @@ pub async fn get_category_page_count(category_name: &str) -> Result<usize> {
             let find = r#""pagination":"#;
             let content = element.html();
 
-            let start_trim =
-                some_or_err!(content.find(find), "pagination key not found") + find.len();
+            let start_trim = content
+                .find(find)
+                .ok_or_else(|| anyhow!("pagination key not found"))?;
             let end_trim = get_last_bracket(
                 content.get(start_trim..).unwrap_or(""),
                 start_trim,
                 BracketType::Curly,
             );
 
-            let str_object = some_or_err!(
-                content.get(start_trim..end_trim + 1),
-                "object string not found"
-            );
+            let str_object = content
+                .get(start_trim..end_trim + 1)
+                .ok_or_else(|| anyhow!("object string not found"))?;
 
             let json = serde_json::from_str::<Value>(str_object).context(err_parse_msg!(
                 "error while convert object string to json values",
