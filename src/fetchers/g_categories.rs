@@ -1,37 +1,9 @@
-use crate::{err_http_msg, err_parse_msg};
+use crate::{err_http_msg, err_parse_msg, fetcher_models::category::JakmallCategories};
 use anyhow::{Context, Result};
 use reqwest::{
     header::{HeaderMap, HeaderValue},
     Client,
 };
-use serde::{Deserialize, Serialize};
-
-pub type JakmallCategories = Vec<Parent>;
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Parent {
-    pub name: String,
-    pub url: String,
-    pub icon: String,
-    pub color: Option<String>,
-    pub children: Vec<Children>,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Children {
-    pub name: String,
-    pub url: String,
-    pub children: Vec<Children2>,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Children2 {
-    pub name: String,
-    pub url: String,
-}
 
 /// Digunakan untuk mendapatkan data kategori json dari `jakmall`
 pub async fn get_categories() -> Result<JakmallCategories> {

@@ -15,6 +15,7 @@ tokio = { version = "1.29.1", features = ["full"] }
 
 [dependencies]
 anyhow = "1.0.71"
+regex = { version = "1.9.1" }
 reqwest = { version = "0.11.18", features = ["default", "gzip", "json"] }
 scraper = "0.17.1"
 serde = { version = "1.0.171", features = ["derive"] }

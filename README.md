@@ -8,6 +8,7 @@ Library `jakmal_rs` jakmall data ekstraktor, beberapa fungsi yang telah tercover
 - `get_categories` berfungsi untuk mendapatkan daftar kategori yang tersedia di jakmall.
 - `get_category_page_count` berfungsi untuk mendapatkan jumlah maksimal halaman yang tersedia pada masing-masing kategori.
 - `get_products_at_page` berfungsi untuk mendapatkan list url product pada halaman kategori di page tertentu.
+- `get_single_product` berfungsi untuk mendapatkan info detail product.
 
 ## Instalasi
 
@@ -65,9 +66,19 @@ async fn main() -> Result<()> {
 }
 ```
 
+- Mendapatkan info detail produk.
+```rs
+#[tokio::main]
+async fn main() {
+    let url = "https://www.jakmall.com/smart-shop/taffgo-smartphone-cooling-fan-kipas-pendingin-radiator-heat-sink-h-15#2985927634130";
+    let product_info = jakmall_rs::get_single_product(url).await;
+}
+```
+
+
 ## Coverage / TODO
 
 - [x] fungsi untuk mendapatkan daftar kategori yang tersedia di jakmall.
 - [x] fungsi untuk mendapatkan jumlah maksimal halaman yang tersedia pada masing-masing kategori.
 - [x] fungsi untuk mendapatkan list url product pada halaman kategori di page tertentu.
-- [ ] fungsi untuk mendapatkan data detail pada halaman utama single produk.
+- [x] fungsi untuk mendapatkan data detail pada halaman utama single produk.

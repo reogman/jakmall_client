@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use crate::{
-    err_http_msg, err_parse, err_parse_msg,
+    err_http_msg, err_parse, err_parse_msg, some_or_err,
     utils::{get_last_bracket, BracketType},
 };
 use anyhow::{anyhow, Context, Result};
@@ -47,9 +47,8 @@ where
             let find = r#""products":"#;
             let content = element.html();
 
-            let start_trim = content
-                .find(find)
-                .ok_or_else(|| anyhow!("products key not found"))?;
+            let start_trim =
+                some_or_err!(content.find(find), "products key not found") + find.len();
             let end_trim = get_last_bracket(
                 content.get(start_trim..).unwrap_or(""),
                 start_trim,
