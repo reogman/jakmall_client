@@ -35,23 +35,38 @@ where
 
     let html = Html::parse_document(&res);
 
-    let title = super::find_title(&html)?;
-    let desc = super::find_description(&html)?;
+    let name = super::find_title(&html)?;
+    let description = super::find_description(&html)?;
+    let _spdt = super::find_spdt(&html)?;
 
-    Ok(Product {
-        name: title,
-        description: desc,
-    })
+    Ok(Product { name, description })
 }
 
 #[cfg(test)]
 mod tests {
     #[tokio::test]
     async fn initial_test() {
-        let url = "https://www.jakmall.com/smart-shop/taffgo-smartphone-cooling-fan-kipas-pendingin-radiator-heat-sink-h-15#2985927634130";
+        // let url = "https://www.jakmall.com/gudanggrosir/iglove-sarung-tangan-touch-screen-untuk-smartphones-tablet#8011694424637";
+        let url = "https://www.jakmall.com/kitchen-depot/one-two-cups-teko-kopi-french-press-coffee-maker-pot-kg73i#9714685366995";
         let info = super::get_single_product(url).await;
 
         assert!(info.is_ok());
         assert!(!info.unwrap().name.is_empty());
+    }
+
+    #[tokio::test]
+    async fn sequence_test() {
+        let urls = [
+            "https://www.jakmall.com/gudanggrosir/iglove-sarung-tangan-touch-screen-untuk-smartphones-tablet#8011694424637",
+            "https://www.jakmall.com/kitchen-depot/one-two-cups-teko-kopi-french-press-coffee-maker-pot-kg73i#9714685366995",
+            "https://www.jakmall.com/indo-audio/kebidu-usb-dongle-hifi-audio-bluetooth-transmitter-receiver-kn320#6981341576545"
+        ];
+
+        for url in urls {
+            let info = super::get_single_product(url).await;
+
+            assert!(info.is_ok(), "{url} {:?}", info);
+            assert!(!info.unwrap().name.is_empty());
+        }
     }
 }

@@ -1,11 +1,8 @@
-use crate::{
-    err_http_msg, err_parse, err_parse_msg, some_or_err,
-    utils::{get_last_bracket, BracketType},
-};
-use anyhow::{anyhow, Context, Result};
+use crate::{err_http_msg, err_parse, err_parse_msg};
+use anyhow::{Context, Result};
+use boa_engine::Source;
 use reqwest::Client;
 use scraper::{Html, Selector};
-use serde_json::Value;
 
 /// Digunakan untuk mendapatkan jumlah total halaman pada kategori tertentu
 ///
@@ -38,44 +35,36 @@ pub async fn get_category_page_count(category_name: &str) -> Result<usize> {
     let selector = Selector::parse("script").unwrap();
 
     for element in html.select(&selector) {
-        if element.html().contains("var result =") {
-            let find = r#"var result ="#;
-            let content = element.html();
+        if element.inner_html().contains("var result =") {
+            let mut content = element.inner_html();
+            content.push_str("result.pagination.total;");
 
-            let start_trim =
-                some_or_err!(content.find(find), "pagination key not found") + find.len();
-            let end_trim = get_last_bracket(
-                content.get(start_trim..).unwrap_or(""),
-                start_trim,
-                BracketType::Curly,
-            );
+            let mut ctx = boa_engine::Context::default();
+            let js_eval = ctx
+                .eval(Source::from_bytes(&content))
+                .or_else(|e| err_parse!(e.to_string()))?;
 
-            let str_object = content
-                .get(start_trim..end_trim)
-                .ok_or_else(|| anyhow!("object string not found"))?;
+            let total = js_eval
+                .to_string(&mut ctx)
+                .or_else(|e| err_parse!(e.to_string()))?
+                .to_std_string()
+                .or_else(|e| err_parse!(e.to_string()))?
+                .parse::<f64>()?;
 
-            let result = serde_json::from_str::<Value>(str_object).context(err_parse_msg!(
-                "error while convert object string to json values",
-            ))?;
+            content.push_str("\nresult.pagination.last_item;");
 
-            let json = some_or_err!(result.as_object(), "error while treat json as object");
-            let pagination =
-                some_or_err!(json.get("pagination"), "error while find pagination key");
-            let pagination = some_or_err!(
-                pagination.as_object(),
-                "error while treat pagination as object"
-            );
-            let total = some_or_err!(pagination.get("total"), "error while find total key");
-            let last_count = some_or_err!(
-                pagination.get("last_item"),
-                "error while find last_item key"
-            );
+            let js_eval = ctx
+                .eval(Source::from_bytes(&content))
+                .or_else(|e| err_parse!(e.to_string()))?;
 
-            let r_total = some_or_err!(total.as_f64(), "error while treat total as number");
-            let r_last_count =
-                some_or_err!(last_count.as_f64(), "error while treat last_item as number");
+            let last_item = js_eval
+                .to_string(&mut ctx)
+                .or_else(|e| err_parse!(e.to_string()))?
+                .to_std_string()
+                .or_else(|e| err_parse!(e.to_string()))?
+                .parse::<f64>()?;
 
-            let max_page = r_total / r_last_count;
+            let max_page = total / last_item;
             return Ok(max_page.ceil() as usize);
         }
     }
@@ -87,7 +76,8 @@ pub async fn get_category_page_count(category_name: &str) -> Result<usize> {
 mod tests {
     #[tokio::test]
     async fn initial_test() {
-        let max_page = super::get_category_page_count("screen-guard-tablet").await;
+        let max_page = super::get_category_page_count("baterai").await;
+        println!("{:?}", max_page);
         assert!(max_page.is_ok());
     }
 

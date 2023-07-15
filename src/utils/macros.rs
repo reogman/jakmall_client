@@ -1,14 +1,4 @@
 #[macro_export]
-macro_rules! string {
-    ($text:literal $(,)?) => {
-        String::from($text)
-    };
-    ($text:expr $(,)?) => {
-        String::from($text)
-    };
-}
-
-#[macro_export]
 macro_rules! err_parse {
     ($msg:literal $(,)?) => {
         return Err(anyhow::anyhow!(format!("Parse Error -> {}", $msg)))

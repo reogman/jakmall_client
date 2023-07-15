@@ -1,11 +1,8 @@
-use crate::{
-    err_http_msg, err_parse, err_parse_msg, some_or_err,
-    utils::{get_last_bracket, BracketType},
-};
-use anyhow::{anyhow, Context, Result};
+use crate::{err_http_msg, err_parse, err_parse_msg};
+use anyhow::{Context, Result};
+use boa_engine::{Context as BContext, Source};
 use reqwest::Client;
 use scraper::{Html, Selector};
-use serde_json::Value;
 
 /// ### <u>Description</u> :
 /// Digunakan untuk mendapatkan data list product
@@ -41,39 +38,28 @@ where
     let selector = Selector::parse("script").unwrap();
 
     for element in html.select(&selector) {
-        if element.html().contains("var result =") {
-            let find = r#"var result ="#;
-            let content = element.html();
+        if element.inner_html().contains("var result =") {
+            let mut content = element.inner_html();
+            content.push_str("result.products.map(p => p.url).join('%comma%')");
 
-            let start_trim =
-                some_or_err!(content.find(find), "products key not found") + find.len();
-            let end_trim = get_last_bracket(
-                content.get(start_trim..).unwrap_or(""),
-                start_trim,
-                BracketType::Curly,
-            );
+            let mut ctx = BContext::default();
 
-            let str_object = content
-                .get(start_trim..end_trim)
-                .ok_or_else(|| anyhow!("object string not found"))?;
+            let js_eval = ctx
+                .eval(Source::from_bytes(&content))
+                .or_else(|e| err_parse!(e.to_string()))?;
 
-            let result = serde_json::from_str::<Value>(str_object).context(err_parse_msg!(
-                "error serialize while convert object string to json model",
-            ))?;
-            let result = some_or_err!(result.as_object(), "error when treat result as object");
+            let urls_string = js_eval
+                .to_string(&mut ctx)
+                .or_else(|e| err_parse!(e.to_string()))?
+                .to_std_string()
+                .or_else(|e| err_parse!(e.to_string()))?;
 
-            let products = some_or_err!(result.get("products"), "missing \"products\" key");
-            let products = some_or_err!(products.as_array(), "error when treat products as array");
-
-            let res = products
-                .iter()
-                .filter(|p| p.as_object().is_some())
-                .filter_map(|obj| obj.get("url"))
-                .filter_map(|arr| arr.as_str())
-                .map(|s| s.to_string())
+            let urls = urls_string
+                .split("%comma%")
+                .map(|s| s.to_owned())
                 .collect::<Vec<_>>();
 
-            return Ok(res);
+            return Ok(urls);
         }
     }
 
