@@ -21,7 +21,7 @@ pub struct SPDT {
 #[serde(rename_all = "camelCase")]
 pub struct Sku {
     pub id: String,
-    pub sku: String,
+    pub sku: Value,
     pub weight: i64,
     pub images: Vec<Image>,
     pub version: i64,
