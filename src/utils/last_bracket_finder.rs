@@ -1,9 +1,15 @@
+use regex::Regex;
+
 pub fn get_last_bracket<T: Into<String>>(
     doc: T,
     offset: usize,
     bracket_type: BracketType,
 ) -> usize {
     let doc: String = doc.into();
+
+    let re = Regex::new(r#"\\""#).unwrap();
+    let doc = re.replace(&doc, "");
+
     let mut counter = 0;
     let mut switch = false;
 
@@ -32,7 +38,7 @@ pub fn get_last_bracket<T: Into<String>>(
             counter -= 1;
 
             if counter == 0 {
-                return index + offset;
+                return index + 2 + offset;
             }
         }
     }

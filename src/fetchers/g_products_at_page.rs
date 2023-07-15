@@ -81,10 +81,11 @@ where
 mod tests {
     #[tokio::test]
     async fn initial_test() {
-        let url = "http://jakmall.com/aksesoris-handphone?page=93";
+        let url = "http://jakmall.com/aksesoris-handphone?page=18";
         let res = super::get_products_at_page(url).await;
+        // let _ = super::get_products_at_page(url).await;
 
-        println!("{:?}", res);
+        // println!("{:?}", res);
         assert!(res.is_ok());
     }
 }
