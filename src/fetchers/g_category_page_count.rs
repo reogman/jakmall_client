@@ -79,6 +79,7 @@ mod tests {
     #[tokio::test]
     async fn initial_test() {
         let max_page = super::get_category_page_count("aksesoris-handphone").await;
+        println!("{:?}", max_page);
         assert!(max_page.is_ok());
     }
 
