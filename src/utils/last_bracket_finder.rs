@@ -1,20 +1,17 @@
-use regex::Regex;
-
 pub fn get_last_bracket<T: Into<String>>(
     doc: T,
     offset: usize,
     bracket_type: BracketType,
 ) -> usize {
     let doc: String = doc.into();
-    let mut offset = offset;
+    let mut minuser: isize = 0;
 
-    let re = Regex::new(r#"\\""#).unwrap();
+    let pat = r#"\""#;
+    let counts = doc.matches(pat).count();
 
-    if re.is_match(&doc) {
-        offset += 2;
-    }
+    minuser -= counts as isize * 2;
 
-    let doc = re.replace(&doc, "");
+    let doc = doc.replace(pat, "");
 
     let mut counter = 0;
     let mut switch = false;
@@ -44,7 +41,17 @@ pub fn get_last_bracket<T: Into<String>>(
             counter -= 1;
 
             if counter == 0 {
-                return index + offset;
+                let mut last_index: isize = index as isize + offset as isize + 1;
+
+                if minuser < 0 {
+                    last_index -= minuser;
+                }
+
+                if let Ok(last_index) = usize::try_from(last_index) {
+                    return last_index;
+                }
+
+                return offset;
             }
         }
     }

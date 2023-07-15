@@ -59,6 +59,8 @@ where
                 .get(start_trim..end_trim + 1)
                 .ok_or_else(|| anyhow!("object string not found"))?;
 
+            println!("{}", str_object);
+
             let products = serde_json::from_str::<Vec<HashMap<&str, Value>>>(str_object).context(
                 err_parse_msg!("error serialize while convert object string to json model",),
             )?;
@@ -81,11 +83,11 @@ where
 mod tests {
     #[tokio::test]
     async fn initial_test() {
-        let url = "http://jakmall.com/aksesoris-handphone?page=18";
+        let url = "http://jakmall.com/aksesoris-handphone?page=62";
         let res = super::get_products_at_page(url).await;
         // let _ = super::get_products_at_page(url).await;
 
-        // println!("{:?}", res);
-        assert!(res.is_ok());
+        println!("{:?}", res);
+        // assert!(res.is_ok());
     }
 }

@@ -39,7 +39,7 @@ pub async fn get_category_page_count(category_name: &str) -> Result<usize> {
 
     for element in html.select(&selector) {
         if element.html().contains("var result =") {
-            let find = r#""pagination":"#;
+            let find = r#"var result ="#;
             let content = element.html();
 
             let start_trim =
@@ -51,16 +51,25 @@ pub async fn get_category_page_count(category_name: &str) -> Result<usize> {
             );
 
             let str_object = content
-                .get(start_trim..end_trim + 1)
+                .get(start_trim..end_trim)
                 .ok_or_else(|| anyhow!("object string not found"))?;
 
-            let json = serde_json::from_str::<Value>(str_object).context(err_parse_msg!(
+            let result = serde_json::from_str::<Value>(str_object).context(err_parse_msg!(
                 "error while convert object string to json values",
             ))?;
 
-            let json = some_or_err!(json.as_object(), "error while treat json as object");
-            let total = some_or_err!(json.get("total"), "error while find total key");
-            let last_count = some_or_err!(json.get("last_item"), "error while find last_item key");
+            let json = some_or_err!(result.as_object(), "error while treat json as object");
+            let pagination =
+                some_or_err!(json.get("pagination"), "error while find pagination key");
+            let pagination = some_or_err!(
+                pagination.as_object(),
+                "error while treat pagination as object"
+            );
+            let total = some_or_err!(pagination.get("total"), "error while find total key");
+            let last_count = some_or_err!(
+                pagination.get("last_item"),
+                "error while find last_item key"
+            );
 
             let r_total = some_or_err!(total.as_f64(), "error while treat total as number");
             let r_last_count =
@@ -78,8 +87,7 @@ pub async fn get_category_page_count(category_name: &str) -> Result<usize> {
 mod tests {
     #[tokio::test]
     async fn initial_test() {
-        let max_page = super::get_category_page_count("aksesoris-handphone").await;
-        println!("{:?}", max_page);
+        let max_page = super::get_category_page_count("screen-guard-tablet").await;
         assert!(max_page.is_ok());
     }
 
@@ -88,7 +96,9 @@ mod tests {
         let couples = [
             ("aksesoris-handphone", 0),
             ("mouse", 0),
-            ("kamera-instan", 0),
+            ("sarung-tangan-pria", 0),
+            ("adaptor-charger", 0),
+            ("screen-guard-tablet", 0),
         ];
 
         for (cat_name, expected) in couples {
