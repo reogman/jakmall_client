@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::{
     err_http_msg, err_parse, err_parse_msg, some_or_err,
     utils::{get_last_bracket, BracketType},
@@ -44,7 +42,7 @@ where
 
     for element in html.select(&selector) {
         if element.html().contains("var result =") {
-            let find = r#""products":"#;
+            let find = r#"var result ="#;
             let content = element.html();
 
             let start_trim =
@@ -52,27 +50,30 @@ where
             let end_trim = get_last_bracket(
                 content.get(start_trim..).unwrap_or(""),
                 start_trim,
-                BracketType::Square,
+                BracketType::Curly,
             );
 
             let str_object = content
-                .get(start_trim..end_trim + 1)
+                .get(start_trim..end_trim)
                 .ok_or_else(|| anyhow!("object string not found"))?;
 
-            println!("{}", str_object);
+            let result = serde_json::from_str::<Value>(str_object).context(err_parse_msg!(
+                "error serialize while convert object string to json model",
+            ))?;
+            let result = some_or_err!(result.as_object(), "error when treat result as object");
 
-            let products = serde_json::from_str::<Vec<HashMap<&str, Value>>>(str_object).context(
-                err_parse_msg!("error serialize while convert object string to json model",),
-            )?;
+            let products = some_or_err!(result.get("products"), "missing \"products\" key");
+            let products = some_or_err!(products.as_array(), "error when treat products as array");
 
-            let products: Vec<String> = products
+            let res = products
                 .iter()
-                .filter_map(|p| p.get("url"))
-                .filter_map(|p| p.as_str())
-                .map(|p| p.to_string())
-                .collect();
+                .filter(|p| p.as_object().is_some())
+                .filter_map(|obj| obj.get("url"))
+                .filter_map(|arr| arr.as_str())
+                .map(|s| s.to_string())
+                .collect::<Vec<_>>();
 
-            return Ok(products);
+            return Ok(res);
         }
     }
 
@@ -83,11 +84,11 @@ where
 mod tests {
     #[tokio::test]
     async fn initial_test() {
-        let url = "http://jakmall.com/aksesoris-handphone?page=62";
+        let url = "http://jakmall.com/aksesoris-handphone?page=81";
         let res = super::get_products_at_page(url).await;
         // let _ = super::get_products_at_page(url).await;
 
-        println!("{:?}", res);
-        // assert!(res.is_ok());
+        // println!("{:?}", res);
+        assert!(res.is_ok());
     }
 }
