@@ -1,13 +1,12 @@
-pub mod g_categories;
-pub mod g_category_page_count;
-pub mod g_products_at_page;
-pub mod g_single_product;
-
-mod find_title;
-pub(self) use find_title::*;
+pub mod client_categories;
+pub mod client_category_page_count;
+pub mod client_products_at_page;
+pub mod client_single_product;
 
 mod find_description;
-pub(self) use find_description::*;
-
 mod find_spdt;
-pub(self) use find_spdt::*;
+mod find_title;
+
+pub(super) use find_description::*;
+pub(super) use find_spdt::*;
+pub(super) use find_title::*;

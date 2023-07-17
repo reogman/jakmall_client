@@ -1,11 +1,11 @@
 [package]
-name = "jakmall-rs"
-version = "0.1.1"
+name = "jakmall_client"
+version = "0.1.0"
 edition = "2021"
 description = "Jakmall data ekstraktor"
 
 [lib]
-name = "jakmall_rs"
+name = "jakmall_client"
 path = "src/lib.rs"
 crate-type = ["lib"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -14,10 +14,10 @@ crate-type = ["lib"]
 tokio = { version = "1.29.1", features = ["full"] }
 
 [dependencies]
-anyhow = "1.0.71"
-boa_engine = "0.17.0"
-regex = { version = "1.9.1" }
-reqwest = { version = "0.11.18", features = ["default", "gzip", "json"] }
-scraper = "0.17.1"
-serde = { version = "1.0.171", features = ["derive"] }
-serde_json = "1.0.102"
+anyhow = "1"
+boa_engine = "0"
+regex = { version = "1.9" }
+reqwest = { version = "0.11", features = ["default", "gzip", "json"] }
+scraper = "0"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1"
